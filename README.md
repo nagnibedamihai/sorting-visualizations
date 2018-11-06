@@ -1,5 +1,8 @@
 # vue-sorting-visualizations
 
+This is a small demo app that contains dynamic visualisations 
+for different sorting algorithms.
+
 ## Project setup
 ```
 yarn install
