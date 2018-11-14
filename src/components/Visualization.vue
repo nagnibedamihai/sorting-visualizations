@@ -1,52 +1,66 @@
 <template>
-    <v-container>
-        <v-card class="pa-3">
-            <v-card-title primary-title>
-                <div>
-                    <h3 class="headline mb-0 text-capitalize">{{ sortType }} Sort</h3>
-                </div>
-            </v-card-title>
-            <v-container fill-height fluid>
-                <v-layout fill-height>
-                    <div class="visualisation-container">
-                        <div class="visualisation-item" v-for="(item, index) in array" :title="item"
-                             :class="{ 'primary': visualisation.highlights.indexOf(index) !== -1 }"
-                             :style="{ height: (Math.floor(item/array.length * 400)) + 'px' }">
-                        </div>
-                    </div>
-                </v-layout>
-            </v-container>
-            <v-card-actions class="text-right">
-                <v-layout row wrap>
-                    <v-flex xs12>
-                        <v-subheader class="pl-0">Array Size</v-subheader>
-                        <v-slider v-model="size" min="10" max="100" thumb-label="always"></v-slider>
-                    </v-flex>
-                    <v-flex xs12>
-                        <v-subheader class="pl-0">Animation Speed</v-subheader>
-                        <v-slider v-model="speed" min="1" max="10" thumb-label="always"></v-slider>
-                    </v-flex>
-                    <v-flex xs-3>
-                        <v-select color="info" height="25" dense v-model="sortType" class="sort-select"
-                            :items="sortTypes"
-                            label="Sort Type"
-                        ></v-select>
-                    </v-flex>
-                    <v-flex xs-9 class="text-xs-right">
-                        <v-btn light color="info" @click="randomize()">
-                            Random
-                            <v-icon right light>cached</v-icon>
-                        </v-btn>
-                        <v-btn light color="primary" @click="sort()">
-                            Sort
-                            <v-icon right light>sort</v-icon>
-                        </v-btn>
-                    </v-flex>
-                </v-layout>
 
-            </v-card-actions>
-        </v-card>
-    </v-container>
+    <div>
+        <v-toolbar v-if="!iframe">
+            <v-toolbar-title class="headline">
+                <span> Vue Sorting Visualizations </span>
+                <span class="font-weight-light"> Demo App </span>
+            </v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn flat href="https://github.com" target="_blank">
+                <span class="mr-2">Latest Release</span>
+            </v-btn>
+        </v-toolbar>
+        <v-container>
+            <v-card class="pa-3">
+                <v-card-title primary-title>
+                    <div>
+                        <h3 class="headline mb-0 text-capitalize">{{ sortType }} Sort</h3>
+                    </div>
+                </v-card-title>
+                <v-container fill-height fluid>
+                    <v-layout fill-height>
+                        <div class="visualisation-container">
+                            <div class="visualisation-item" v-for="(item, index) in array" :title="item"
+                                 :class="{ 'primary': visualisation.highlights.indexOf(index) !== -1 }"
+                                 :style="{ height: (Math.floor(item/array.length * 400)) + 'px' }">
+                            </div>
+                        </div>
+                    </v-layout>
+                </v-container>
+                <v-card-actions class="text-right">
+                    <v-layout row wrap>
+                        <v-flex xs12>
+                            <v-subheader class="pl-0">Array Size</v-subheader>
+                            <v-slider v-model="size" min="10" max="100" thumb-label="always"></v-slider>
+                        </v-flex>
+                        <v-flex xs12>
+                            <v-subheader class="pl-0">Animation Speed</v-subheader>
+                            <v-slider v-model="speed" min="1" max="10" thumb-label="always"></v-slider>
+                        </v-flex>
+                        <v-flex xs-3>
+                            <v-select color="info" height="25" dense v-model="sortType" class="sort-select"
+                                      :items="sortTypes"
+                                      label="Sort Type"
+                            ></v-select>
+                        </v-flex>
+                        <v-flex xs-9 class="text-xs-right">
+                            <v-btn light color="info" @click="randomize()">
+                                Random
+                                <v-icon right light>cached</v-icon>
+                            </v-btn>
+                            <v-btn light color="primary" @click="sort()">
+                                Sort
+                                <v-icon right light>sort</v-icon>
+                            </v-btn>
+                        </v-flex>
+                    </v-layout>
+
+                </v-card-actions>
+            </v-card>
+        </v-container>
+    </div>
+
 </template>
 
 <style>
@@ -80,10 +94,12 @@
 <script>
     export default {
         data: () => ({
+            query: {},
+            iframe: false,
             array: [],
             size: 50,
             speed: 5,
-            sortType: window.location.href.split('#')[1] || 'bubble',
+            sortType: 'bubble',
             sortTypes: [
                 {
                     'value': 'quick',
@@ -104,9 +120,29 @@
         mounted() {
             let self = this;
             self.randomize();
+            self.init();
         },
 
         methods: {
+
+            init() {
+                let self = this;
+                let queryString = window.location.href.split('?')[1];
+                if (queryString) {
+                    queryString.split('&').forEach((q) => {
+                        if (q.split('=').length) {
+                            self.query[q.split('=')[0]] = q.split('=')[1];
+                        }
+                    })
+                }
+                if (self.query.hasOwnProperty('sort')) {
+                    self.sortType = (self.sortTypes.filter((s) => { return s.value === self.query.sort })[0] || { 'value': 'bubble'}).value;
+                }
+                if (self.query.hasOwnProperty('iframe')) {
+                    self.iframe = self.query.iframe === 'true';
+                }
+            },
+
             randomize() {
                 let self = this;
                 self.resetVisualization();
